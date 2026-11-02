@@ -624,7 +624,7 @@
           <dt>AVAILABILITY</dt>
           <dd>Available for remote consulting worldwide, on-site by arrangement.</dd>
         </dl>
-        <form id="contact-form">
+        <form id="contact-form" action="https://formspree.io/f/xdeewqke" method="POST">
           <div>
             <label for="name">Name</label>
             <input type="text" id="name" name="name" required>
@@ -638,7 +638,7 @@
             <textarea id="message" name="message" required></textarea>
           </div>
           <button type="submit" class="submit-btn">Send message</button>
-          <p class="form-note">This form is a placeholder — it doesn't send yet.</p>
+          <p class="form-note" id="contact-form-note">Your message goes straight to my inbox.</p>
         </form>
       </div>
     </section>
@@ -746,7 +746,34 @@
 
   document.getElementById('contact-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    alert('This form is a placeholder — connect it to a form service to receive real messages.');
+    var form = e.target;
+    var note = document.getElementById('contact-form-note');
+    var btn = form.querySelector('.submit-btn');
+    var originalBtnText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    note.textContent = 'Your message goes straight to my inbox.';
+    note.style.color = '';
+
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    }).then(function(response) {
+      if (response.ok) {
+        form.reset();
+        note.textContent = 'Thanks — your message has been sent. I\'ll get back to you soon.';
+      } else {
+        note.textContent = 'Something went wrong sending that. Please try again, or email me directly.';
+        note.style.color = '#b23b3b';
+      }
+    }).catch(function() {
+      note.textContent = 'Something went wrong sending that. Please check your connection and try again.';
+      note.style.color = '#b23b3b';
+    }).finally(function() {
+      btn.disabled = false;
+      btn.textContent = originalBtnText;
+    });
   });
 
 
